@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>قائمة المستخدمين</title>
+  <style>
+    body {
+      background-color: #000;
+      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    table {
+      margin: 20px auto;
+      border-collapse: collapse;
+      width: 90%;
+    }
+    th, td {
+      border: 1px solid #ccc;
+      padding: 10px;
+    }
+    th {
+      background-color: #3897f0;
+    }
+    .delete-btn {
+      padding: 5px 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>المستخدمون الذين سجلوا الدخول</h1>
+  <table>
+    <thead>
+      <tr>
+        <th>اسم المستخدم</th>
+        <th>كلمة المرور</th>
+        <th>تاريخ التسجيل</th>
+        <th>حذف</th>
+      </tr>
+    </thead>
+    <tbody id="userTableBody"></tbody>
+  </table>
+
+  <script>
+    async function fetchUsers() {
+      try {
+        const res = await fetch('/users');
+        const users = await res.json();
+
+        const tbody = document.getElementById('userTableBody');
+        tbody.innerHTML = '';
+
+        users.forEach(user => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${user.username}</td>
+            <td>${user.password}</td>
+            <td>${new Date(user.date).toLocaleString()}</td>
+            <td><button class="delete-btn" onclick="deleteUser('${user._id}')">حذف</button></td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (error) {
+        alert('حدث خطأ في جلب المستخدمين');
+        console.error(error);
+      }
+    }
+
+    async function deleteUser(id) {
+      if (confirm('هل أنت متأكد أنك تريد حذف هذا المستخدم؟')) {
+        try {
+          const res = await fetch(`/users/${id}`, { method: 'DELETE' });
+          const result = await res.json();
+          alert(result.message);
+          fetchUsers(); // تحديث الجدول
+        } catch (err) {
+          alert('فشل في الحذف');
+          console.error(err);
+        }
+      }
+    }
+
+    fetchUsers();
+  </script>
+</body>
+</html>
